@@ -35,6 +35,7 @@ import kotlin.concurrent.thread
 import kotlin.math.atan2
 
 var i = 0
+var j = 0
 
 private class PoseAnalyzer(private val poseFoundListener: (Pose) -> Unit) : ImageAnalysis.Analyzer {
 
@@ -173,7 +174,6 @@ class MainActivity : AppCompatActivity() {
 
     private var imageCapture: ImageCapture? = null
 
-
     private lateinit var cameraExecutor: ExecutorService
 
     private lateinit var textView : TextView
@@ -184,6 +184,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val inputStream = assets.open("nxde.csv")
+        var reader = CSVReader(InputStreamReader(inputStream))
+        var allContent = reader.readAll()
+        var Angles = allContent[i].toList()
+        Log.i("Dwdqa", Angles.toString())
+
         setContentView(R.layout.activity_main)
 
         csvTest = csvRead31(this.assets)
@@ -217,44 +223,18 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun csvRead(): List<String>? {
-        return try {
-            val assetManager : AssetManager = this.assets
-            val inputStream = assetManager.open("nxde.csv")
-            val reader = CSVReader(InputStreamReader(inputStream))
-            val allContent = reader.readAll()
-            Log.i("data_be",allContent[i].toList().toString())
+
+    fun csvRead(allContent : List<String>?): List<String>? {
+        try {
+//            Log.i("vlog",Angles.toString())
             i++
+            return null
 
-            // return
-            allContent[i].toList()
+
         }catch (e: java.lang.Exception){
-            Log.e("csv_bug", e.toString())
-            // return
-            null
-        }
-    }
+            Log.i("vlog", e.toString());
+            return null
 
-    private fun csvRead1(): List<String>? {
-        return try {
-            val assetManager : AssetManager = this.assets
-            val inputStream = assetManager.open("revers.csv")
-            val reader = CSVReader(InputStreamReader(inputStream))
-            val allContent = reader.readAll()
-
-            var resultCSV = ArrayList<String>()
-            for(content in allContent){
-                resultCSV.add(content.toList().toString())
-            }
-
-//            Log.i("read csv1", resultCSV.toString())
-
-            // return
-            resultCSV
-        }catch (e: java.lang.Exception){
-            Log.e("csv_bug", e.toString())
-            // return
-            null
         }
     }
 
@@ -370,9 +350,7 @@ class MainActivity : AppCompatActivity() {
                 rect_overlay.drawLine(leftEar, leftShoulder)
                 builder.append("${leftNeckAngle.toInt()} 왼쪽 목  \n")
                 leftNeckAngle
-            } else {
-                null
-            }
+            } else {null}
             // 오른쪽 목 8,12
 
             var rightNeckAngle = if(rightEar != null && rightShoulder != null){
@@ -380,9 +358,7 @@ class MainActivity : AppCompatActivity() {
                 rect_overlay.drawLine(rightEar, rightShoulder)
                 builder.append("${rightNeckAngle.toInt()} 오른쪽 목 \n")
                 rightNeckAngle
-            }else{
-                null
-            }
+            }else {null}
 
             //왼쪽 가슴 11,23,25
             var leftChestAngle = if( leftShoulder != null && leftHip != null  && leftKnee != null){
@@ -422,13 +398,14 @@ class MainActivity : AppCompatActivity() {
 
             // 왼쪽 어깨 13,11,23
 
-            if( leftElbow != null && leftShoulder != null  && leftHip != null){
+            var leftShoulderAngle =if( leftElbow != null && leftShoulder != null  && leftHip != null){
                 var leftShoulderAngle = getAngle( leftElbow, leftShoulder,leftHip);
                 builder.append("${leftShoulderAngle.toInt()} 왼쪽 어깨 \n")
-            }
+                leftShoulderAngle
+            } else {null}
             // 오른쪽 어깨 14,12,24
 
-            if( rightElbow != null && rightShoulder != null  && rightHip != null){
+            var rightShoulderAngle =if( rightElbow != null && rightShoulder != null  && rightHip != null){
                 var rightShoulderAngle = getAngle( rightElbow, rightShoulder,rightHip);
                 builder.append("${rightShoulderAngle.toInt()} 오른쪽 어깨 \n")
             }
@@ -451,6 +428,17 @@ class MainActivity : AppCompatActivity() {
                 0
             }
 
+//            var trueLeftNeckAngle = csvRead()?.get(0)?.toInt()
+//            var trueRightNeckAngle = csvRead()?.get(1)?.toInt()
+//            var trueLeftChestAngle = csvRead()?.get(2)?.toInt()
+//            var trueRightChestAngle = csvRead()?.get(3)?.toInt()
+//            var trueLeftLegAngle = csvRead()?.get(4)?.toInt()
+//            var trueRightLegAngle = csvRead()?.get(5)?.toInt()
+//            var trueLeftShoulderAngle = csvRead()?.get(6)?.toInt()
+//            var trueRightShoulderAngle = csvRead()?.get(7)?.toInt()
+//            var trueLeftArmAngle = csvRead()?.get(8)?.toInt()
+//            var trueRightArmAngle = csvRead(Angles)?.get(9)?.toInt()
+            Log.i("dwd",rightArmAngle.toString())
 
             thread {
 
@@ -486,6 +474,33 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+//            thread{
+//
+//                if (leftNeckAngle != null && rightNeckAngle != null&&leftChestAngle != null&& rightChestAngle != null
+//                    && leftLegAngle != null&& rightLegAngle != null&& leftArmAngle != null&& leftShoulderAngle != null&& rightShoulderAngle != null&& rightArmAngle != null) {
+//                    if (trueLeftNeckAngle != null &&trueRightNeckAngle != null &&trueLeftChestAngle != null &&trueRightChestAngle != null
+//                        &&trueLeftLegAngle != null &&trueRightLegAngle != null &&trueLeftShoulderAngle != null &&trueRightShoulderAngle != null
+//                        &&trueLeftArmAngle != null &&trueRightArmAngle != null) {
+//                        if((leftNeckAngle.toInt() in trueLeftNeckAngle-1000 .. trueLeftNeckAngle+1000 )
+//    //                        (rightNeckAngle.toInt() in trueRightNeckAngle .. trueRightNeckAngle )&&
+//    //                        (leftChestAngle.toInt() in trueLeftChestAngle .. trueLeftChestAngle )&&
+//    //                        (rightChestAngle.toInt() in trueRightChestAngle .. trueRightChestAngle )&&
+//    //                        (leftLegAngle.toInt() in trueLeftLegAngle .. trueLeftLegAngle )&&
+//    //                        (rightLegAngle.toInt() in trueRightLegAngle .. trueRightLegAngle )&&
+//    //                        (leftShoulderAngle.toInt() in trueLeftShoulderAngle .. trueLeftShoulderAngle )&&
+//    //                        (rightShoulderAngle.toInt() in trueRightShoulderAngle .. trueRightShoulderAngle )&&
+//    //                        (leftArmAngle.toInt() in trueLeftArmAngle .. trueLeftArmAngle )&&
+//    //                        (rightArmAngle.toInt() in trueRightArmAngle .. trueRightArmAngle )
+//                        ){
+//                            j++
+//                            Log.i("g", j.toString())
+//
+//
+//                        }
+//                    }
+//
+//                }
+//            }
 
 
 
